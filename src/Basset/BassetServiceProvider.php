@@ -180,13 +180,16 @@ class BassetServiceProvider extends ServiceProvider {
     /**
      * Register the collection repository.
      *
+     * Config basset::manifest points to the folder where the collections manifests are generated. 
+     * It used to point to app.manifest
+     * 
      * @return void
      */
     protected function registerManifest()
     {
         $this->app['basset.manifest'] = $this->app->share(function($app)
         {
-            $meta = $app['config']->get('app.manifest');
+            $meta = $app['config']->get('basset::manifest');
 
             return new Manifest($app['files'], $meta);
         });
