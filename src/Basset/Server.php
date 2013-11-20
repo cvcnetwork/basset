@@ -77,7 +77,7 @@ class Server {
     {
         if ( ! isset($this->app['basset'][$collection]))
         {
-            return '<!-- Basset could not find collection: '.$collection.' -->';
+            return '<!-- Basset could not find collection: '.$collection.' of group: ' . $group . '-->';
         }
 
         // Get the collection instance from the array of collections. This instance will be used
