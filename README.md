@@ -13,13 +13,12 @@ Basset is a better asset management package for the Laravel framework. Basset sh
 
 ### Installation
 
-- [Basset on Packagist](https://packagist.org/packages/jasonlewis/basset)
-- [Basset on GitHub](https://github.com/jasonlewis/basset)
+- [Basset on GitHub](https://github.com/cvcnetwork/basset)
 
-To get the latest version of Basset simply require it in your `composer.json` file.
+To get the latest version of Basset simply require it in your `composer.json` file, after adding a git repository.
 
 ~~~
-"jasonlewis/basset": "dev-master"
+"cvcnetwork/basset": "dev-master"
 ~~~
 
 You'll then need to run `composer install` to download it and have the autoloader updated.
@@ -46,11 +45,18 @@ Basset also ships with a facade which provides the static syntax for creating co
 )
 ~~~
 
+Don't forget to configure the manifest path (usually app_path().'/meta') in app/config/basset.php
+
+
 ### Documentation
 
 [View the official documentation](http://jasonlewis.me/code/basset/4.0).
 
 ### Changes
+
+#### v4.0.1 
+- Split manifest location out into the standard confirugation paths to allow having separate development and produciton manifests.
+- Production builds now require the --env=production option, and datestamp the build folder for production assets
 
 #### v4.0.0 Beta 3
 
