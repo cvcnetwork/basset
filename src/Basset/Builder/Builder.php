@@ -94,7 +94,7 @@ class Builder {
       throw new BuildNotRequiredException;
     }
 
-    $fingerprint = $this->buildDate . '/' . $identifier . '-' . md5($build) . '.' . $collection->getExtension($group);
+    $fingerprint = $this->buildDate . '/' . $this->buildDate . '-' . $identifier . '-' . md5($build) . '.' . $collection->getExtension($group);
 
     $buildFolder = $this->buildPath . '/' . $this->buildDate;
     $path = $this->buildPath . '/' . $fingerprint;
