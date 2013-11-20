@@ -84,6 +84,11 @@ class BuildCommand extends Command {
       $manifest = new Manifest(\App::make('files'), $meta);
       \App::bind('basset.manifest', $manifest);
       $this->comment('Meta folder: ' . $meta);
+     //Remove the collections so we always get a new one
+      if (\File::exists($meta . '/collections.json')) {
+        \File::delete($meta . '/collections.json');
+      }
+
     }
     else {
       $this->comment('Starting development build...');
