@@ -68,7 +68,7 @@ class BassetServiceProvider extends ServiceProvider {
             $this->app['basset.log']->getMonolog()->pushHandler($handler);
         }
 
-        $this->app->instance('basset.path.build', $this->app['path.public'].'/'.$this->app['config']->get('basset::build_path'));
+        $this->app->instance('basset.path.build', $this->app['path.public'].'/'.$this->app['config']->get('basset.build_path'));
 
         $this->registerBladeExtensions();
 
@@ -83,7 +83,7 @@ class BassetServiceProvider extends ServiceProvider {
 
     /**
      * Register the Blade extensions with the compiler.
-     * 
+     *
      * @return void
      */
     protected function registerBladeExtensions()
@@ -93,21 +93,21 @@ class BassetServiceProvider extends ServiceProvider {
         $blade->extend(function($value, $compiler)
         {
             $matcher = $compiler->createMatcher('javascripts');
-            
+
             return preg_replace($matcher, '$1<?php echo basset_javascripts$2; ?>', $value);
         });
 
         $blade->extend(function($value, $compiler)
         {
             $matcher = $compiler->createMatcher('stylesheets');
-            
+
             return preg_replace($matcher, '$1<?php echo basset_stylesheets$2; ?>', $value);
         });
 
         $blade->extend(function($value, $compiler)
         {
             $matcher = $compiler->createMatcher('assets');
-            
+
             return preg_replace($matcher, '$1<?php echo basset_assets$2; ?>', $value);
         });
     }
@@ -127,7 +127,7 @@ class BassetServiceProvider extends ServiceProvider {
 
     /**
      * Register the asset finder.
-     * 
+     *
      * @return void
      */
     protected function registerAssetFinder()
@@ -153,7 +153,7 @@ class BassetServiceProvider extends ServiceProvider {
 
     /**
      * Register the logger.
-     * 
+     *
      * @return void
      */
     protected function registerLogger()
@@ -180,9 +180,9 @@ class BassetServiceProvider extends ServiceProvider {
     /**
      * Register the collection repository.
      *
-     * Config basset.manifest points to the folder where the collections manifests are generated. 
+     * Config basset.manifest points to the folder where the collections manifests are generated.
      * It used to point to app.manifest
-     * 
+     *
      * @return void
      */
     protected function registerManifest()
@@ -234,7 +234,7 @@ class BassetServiceProvider extends ServiceProvider {
     public function registerCommands()
     {
         $this->registerBassetCommand();
-        
+
         $this->registerBuildCommand();
 
         $this->commands('command.basset', 'command.basset.build');
@@ -242,7 +242,7 @@ class BassetServiceProvider extends ServiceProvider {
 
     /**
      * Register the basset command.
-     * 
+     *
      * @return void
      */
     protected function registerBassetCommand()
@@ -255,7 +255,7 @@ class BassetServiceProvider extends ServiceProvider {
 
     /**
      * Register the build command.
-     * 
+     *
      * @return void
      */
     protected function registerBuildCommand()

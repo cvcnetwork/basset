@@ -55,7 +55,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
         $entry = $this->app['basset.manifest']->make($collection);
         $entry->setProductionFingerprint($group, $fingerprint);
 
-        $this->app['config']->shouldReceive('get')->with('basset::build_path')->andReturn('assets');
+        $this->app['config']->shouldReceive('get')->with('basset.build_path')->andReturn('assets');
 
         $this->assertEquals($expected, $this->server->{$group}($name));
     }
@@ -73,7 +73,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
     public function testServingDevelopmentCollectionReturnsExpectedHtml()
     {
         $this->app['basset']->shouldReceive(array('offsetExists' => true, 'offsetGet' => $collection = m::mock('Basset\Collection')))->with('foo');
-        
+
         $this->app['config']->shouldReceive('get')->once()->with('basset::production')->andReturn('prod');
 
         $this->app['basset.builder']->shouldReceive('buildAsDevelopment')->once()->with($collection, 'stylesheets');
@@ -99,7 +99,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
         $entry->addDevelopmentAsset('bar.less', 'bar.css', 'stylesheets');
         $entry->addDevelopmentAsset('baz.sass', 'baz.css', 'stylesheets');
 
-        $this->app['config']->shouldReceive('get')->with('basset::build_path')->andReturn('assets');
+        $this->app['config']->shouldReceive('get')->with('basset.build_path')->andReturn('assets');
 
         $expected = '<link rel="stylesheet" type="text/css" href="http://localhost/assets/foo/bar.css" />'.PHP_EOL.
                     '<link rel="stylesheet" type="text/css" href="http://localhost/qux.css" />'.PHP_EOL.
@@ -111,7 +111,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
     public function testRawAssetsAreServedBeforeBuiltCollectionHtml()
     {
         $this->app['basset']->shouldReceive(array('offsetExists' => true, 'offsetGet' => $collection = m::mock('Basset\Collection')))->with('foo');
-        
+
         $this->app['config']->shouldReceive('get')->once()->with('basset::production')->andReturn('testing');
 
         $collection->shouldReceive('getAssetsOnlyRaw')->with('stylesheets')->andReturn(array($asset = m::mock('Basset\Asset')));
@@ -122,7 +122,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
         $entry = $this->app['basset.manifest']->make($collection);
         $entry->setProductionFingerprint('stylesheets', 'bar-123.css');
 
-        $this->app['config']->shouldReceive('get')->with('basset::build_path')->andReturn('assets');
+        $this->app['config']->shouldReceive('get')->with('basset.build_path')->andReturn('assets');
 
         $expected = '<link rel="stylesheet" type="text/css" href="http://localhost/css/baz.css" />'.PHP_EOL.
                     '<link rel="stylesheet" type="text/css" href="http://localhost/assets/bar-123.css" />';
@@ -133,7 +133,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
     public function testServingCollectionsWithCustomFormat()
     {
         $this->app['basset']->shouldReceive(array('offsetExists' => true, 'offsetGet' => $collection = m::mock('Basset\Collection')))->with('foo');
-        
+
         $this->app['config']->shouldReceive('get')->once()->with('basset::production')->andReturn('testing');
 
         $collection->shouldReceive('getAssetsOnlyRaw')->with('stylesheets')->andReturn(array());
@@ -142,7 +142,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
         $entry = $this->app['basset.manifest']->make($collection);
         $entry->setProductionFingerprint('stylesheets', 'foo-123.css');
 
-        $this->app['config']->shouldReceive('get')->with('basset::build_path')->andReturn('assets');
+        $this->app['config']->shouldReceive('get')->with('basset.build_path')->andReturn('assets');
 
         $expected = '<link rel="stylesheet" type="text/css" href="http://localhost/assets/foo-123.css" media="print" />';
         $this->assertEquals($expected, $this->server->stylesheets('foo', '<link rel="stylesheet" type="text/css" href="%s" media="print" />'));
@@ -172,7 +172,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
         $entry = $this->app['basset.manifest']->make($collection);
         $entry->addDevelopmentAsset('baz.sass', 'baz.css', 'stylesheets');
 
-        $this->app['config']->shouldReceive('get')->with('basset::build_path')->andReturn('assets');
+        $this->app['config']->shouldReceive('get')->with('basset.build_path')->andReturn('assets');
 
         $expected = '<link rel="stylesheet" type="text/css" href="http://localhost/bar.css" />'.PHP_EOL.
                     '<link rel="stylesheet" type="text/css" href="http://localhost/assets/foo/baz.css" />';
