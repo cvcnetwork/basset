@@ -19,28 +19,24 @@ class BuildCommand extends Command {
    * @var string
    */
   protected $name = 'basset:build';
-
   /**
    * The console command description.
    *
    * @var string
    */
   protected $description = 'Build asset collections';
-
   /**
    * Basset environment instance.
    *
    * @var \Basset\Environment
    */
   protected $environment;
-
   /**
    * Basset builder instance.
    *
    * @var \Basset\Builder\Builder
    */
   protected $builder;
-
   /**
    * Basset filesystem cleaner instance.
    *
@@ -61,8 +57,8 @@ class BuildCommand extends Command {
     parent::__construct();
 
     $this->environment = $environment;
-    $this->builder = $builder;
-    $this->cleaner = $cleaner;
+    $this->builder     = $builder;
+    $this->cleaner     = $cleaner;
   }
 
   /**
@@ -72,19 +68,20 @@ class BuildCommand extends Command {
    */
   public function fire()
   {
-    $this->input->getOption('force') and $this->builder->setForce(true);
+    $this->input->getOption('force') and $this->builder->setForce(TRUE);
 
-    $this->input->getOption('gzip') and $this->builder->setGzip(true);
+    $this->input->getOption('gzip') and $this->builder->setGzip(TRUE);
 
     if ($production = $this->input->getOption('production')) {
       $this->comment('Starting production build...');
 
       //Bind a new manifest
       $meta = \Config::get('basset.manifest');
-      $manifest = new Manifest(\App::make('files'), $meta);
-      \App::bind('basset.manifest', $manifest);
+      \App::bind('basset.manifest', function () use ($meta) {
+        return new Manifest(\App::make('files'), $meta);
+      });
       $this->comment('Meta folder: ' . $meta);
-     //Remove the collections so we always get a new one
+      //Remove the collections so we always get a new one
       if (\File::exists($meta . '/collections.json')) {
         \File::delete($meta . '/collections.json');
       }
@@ -100,7 +97,6 @@ class BuildCommand extends Command {
       $this->error('[gzip] Build will not use Gzip as the required dependencies are not available.');
       $this->line('');
     }
-
     foreach ($collections as $name => $collection) {
       if ($production) {
         $this->buildAsProduction($name, $collection);
@@ -111,6 +107,35 @@ class BuildCommand extends Command {
 
       $this->cleaner->clean($name);
     }
+  }
+
+  /**
+   * Gather the collections to be built.
+   *
+   * @return array
+   */
+  protected function gatherCollections()
+  {
+    if (!is_null($collection = $this->input->getArgument('collection'))) {
+      if (!$this->environment->has($collection)) {
+        $this->comment('[' . $collection . '] Collection not found.');
+
+        return array();
+      }
+
+      $this->comment('Gathering assets for collection...');
+
+      $collections = array($collection => $this->environment->collection($collection));
+    }
+    else {
+      $this->comment('Gathering all collections to build...');
+
+      $collections = $this->environment->all();
+    }
+
+    $this->line('');
+
+    return $collections;
   }
 
   /**
@@ -149,35 +174,6 @@ class BuildCommand extends Command {
   }
 
   /**
-   * Gather the collections to be built.
-   *
-   * @return array
-   */
-  protected function gatherCollections()
-  {
-    if (!is_null($collection = $this->input->getArgument('collection'))) {
-      if (!$this->environment->has($collection)) {
-        $this->comment('[' . $collection . '] Collection not found.');
-
-        return array();
-      }
-
-      $this->comment('Gathering assets for collection...');
-
-      $collections = array($collection => $this->environment->collection($collection));
-    }
-    else {
-      $this->comment('Gathering all collections to build...');
-
-      $collections = $this->environment->all();
-    }
-
-    $this->line('');
-
-    return $collections;
-  }
-
-  /**
    * Get the console command arguments.
    *
    * @return array
@@ -198,7 +194,7 @@ class BuildCommand extends Command {
   {
     return array(
       array('production', 'p', InputOption::VALUE_NONE, 'Build assets for a production environment'),
-      array('gzip', null, InputOption::VALUE_NONE, 'Gzip built assets'),
+      array('gzip', NULL, InputOption::VALUE_NONE, 'Gzip built assets'),
       array('force', 'f', InputOption::VALUE_NONE, 'Forces a re-build of the collection')
     );
   }

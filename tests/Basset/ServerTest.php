@@ -1,15 +1,16 @@
 <?php
 
+use Illuminate\Routing\RouteCollection;
 use Mockery as m;
 use Basset\Server;
 use Illuminate\Http\Request;
 use Basset\Manifest\Manifest;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Filesystem\Filesystem;
-use Symfony\Component\Routing\RouteCollection;
 
 class ServerTest extends PHPUnit_Framework_TestCase {
-
+    /** @var  Server */
+    private $server;
 
     public function tearDown()
     {
@@ -36,7 +37,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
     public function testServingInvalidCollectionReturnsHtmlComment()
     {
         $this->app['basset']->shouldReceive('offsetExists')->once()->with('foo')->andReturn(false);
-        $this->assertEquals('<!-- Basset could not find collection: foo -->', $this->server->serve('foo', 'stylesheets'));
+        $this->assertEquals('<!-- Basset could not find collection: foo of group: stylesheets -->', $this->server->serve('foo', 'stylesheets'));
     }
 
 

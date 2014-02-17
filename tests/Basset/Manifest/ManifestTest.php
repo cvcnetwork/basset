@@ -11,7 +11,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
     }
 
 
-    public function setUp()
+  public function setUp()
     {
         $this->files = new Illuminate\Filesystem\Filesystem;
         $this->manifest = new Basset\Manifest\Manifest($this->files, __DIR__.'/fixtures');

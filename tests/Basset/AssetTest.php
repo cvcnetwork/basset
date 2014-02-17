@@ -4,8 +4,16 @@ use Mockery as m;
 use Basset\Asset;
 use Basset\Factory\FilterFactory;
 
-class AssetTest extends PHPUnit_Framework_TestCase {
 
+class AssetTest extends PHPUnit_Framework_TestCase {
+    /** @var  Asset */
+    private $asset;
+    /** @var \Illuminate\Filesystem\Filesystem */
+    private $files;
+    /** @var \Basset\Factory\FactoryManager  */
+    private $factory;
+    /** @var  \Basset\Factory\FilterFactory */
+    private $filter;
 
     public function tearDown()
     {
@@ -27,6 +35,9 @@ class AssetTest extends PHPUnit_Framework_TestCase {
         $this->asset = new Asset($this->files, $this->factory, 'testing', 'path/to/public/foo/bar.sass', 'foo/bar.sass');
         $this->asset->setOrder(1);
         $this->asset->setGroup('stylesheets');
+
+        parent::setup();
+
     }
 
 
@@ -98,14 +109,14 @@ class AssetTest extends PHPUnit_Framework_TestCase {
     public function testFiltersAreAppliedToAssets()
     {
         $this->filter->shouldReceive('make')->once()->with('FooFilter')->andReturn($filter = m::mock('Basset\Filter\Filter'));
-        
+
         $filter->shouldReceive('setResource')->once()->with($this->asset)->andReturn(m::self());
         $filter->shouldReceive('getFilter')->once()->andReturn('FooFilter');
 
         $this->asset->apply('FooFilter');
 
         $filters = $this->asset->getFilters();
-        
+
         $this->assertArrayHasKey('FooFilter', $filters->all());
         $this->assertInstanceOf('Basset\Filter\Filter', $filters['FooFilter']);
     }
@@ -124,7 +135,7 @@ class AssetTest extends PHPUnit_Framework_TestCase {
         $this->asset->apply(array('FooFilter', 'BarFilter'));
 
         $filters = $this->asset->getFilters();
-        
+
         $this->assertArrayHasKey('FooFilter', $filters->all());
         $this->assertArrayHasKey('BarFilter', $filters->all());
     }
@@ -184,7 +195,7 @@ class AssetTest extends PHPUnit_Framework_TestCase {
     {
         $contents = 'html { background-color: #fff; }';
 
-        $instantiatedFilter = m::mock('Assetic\Filter\FilterInterface');
+        $instantiatedFilter = m::mock('\Assetic\Filter\FilterInterface');
         $instantiatedFilter->shouldReceive('filterLoad')->once()->andReturn(null);
         $instantiatedFilter->shouldReceive('filterDump')->once()->andReturnUsing(function($asset) use ($contents)
         {
@@ -193,13 +204,11 @@ class AssetTest extends PHPUnit_Framework_TestCase {
 
         $filter = m::mock('Basset\Filter\Filter')->shouldDeferMissing();
         $filter->shouldReceive('setResource')->once()->with($this->asset)->andReturn(m::self());
-        $filter->shouldReceive('getFilter')->once()->andReturn('BodyFilter');
+        $filter->shouldReceive('getFilter')->twice()->andReturn('BodyFilter');
         $filter->shouldReceive('getInstance')->once()->andReturn($instantiatedFilter);
 
-
-        $config = m::mock('Illuminate\Config\Repository');
-
-        $this->files->shouldReceive('getRemote')->once()->with('path/to/public/foo/bar.sass')->andReturn($contents);
+        $this->files->shouldReceive('exists')->once()->with('path/to/public/foo/bar.sass')->andReturn(true);
+        $this->files->shouldReceive('get')->once()->with('path/to/public/foo/bar.sass')->andReturn($contents);
 
         $this->asset->apply($filter);
 

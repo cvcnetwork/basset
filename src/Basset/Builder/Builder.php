@@ -13,34 +13,30 @@ class Builder {
    * @var \Illuminate\Filesystem\Filesystem
    */
   protected $files;
-
   /**
    * Basset manifest instance.
    *
    * @var \Basset\Manifest\Manifest
    */
   protected $manifest;
-
   /**
    * Path to built collections.
    *
    * @var string
    */
   protected $buildPath;
-
   /**
    * Indicates if the build will be pre-gzipped.
    *
    * @var bool
    */
-  protected $gzip = false;
-
+  protected $gzip = FALSE;
   /**
    * Indicates if the build will be forced.
    *
    * @var bool
    */
-  protected $force = false;
+  protected $force = FALSE;
 
   /**
    * Create a new builder instance.
@@ -53,13 +49,25 @@ class Builder {
    */
   public function __construct(Filesystem $files, Manifest $manifest, $buildPath)
   {
-    $this->files = $files;
-    $this->manifest = $manifest;
+    $this->files     = $files;
+    $this->manifest  = $manifest;
     $this->buildPath = $buildPath;
     $this->buildDate = date('Ymd_his');
 
     //We ALWAYS generate new files on a production build.. and add a separate folder just for kicks
     $this->makeBuildPath();
+  }
+
+  /**
+   * Make the build path if it does not exist.
+   *
+   * @return void
+   */
+  protected function makeBuildPath()
+  {
+    if (!$this->files->exists($this->buildPath)) {
+      $this->files->makeDirectory($this->buildPath);
+    }
   }
 
   /**
@@ -83,7 +91,7 @@ class Builder {
     // as a basis for the collections fingerprint and it will decide as to whether the
     // collection needs to be rebuilt.
     $build = array_to_newlines($assets->map(function ($asset) {
-      return $asset->build(true);
+      return $asset->build(TRUE);
     })->all());
 
     // If the build is empty then we'll reset the fingerprint on the manifest entry and throw the
@@ -97,20 +105,29 @@ class Builder {
     $fingerprint = $this->buildDate . '/' . $this->buildDate . '-' . $identifier . '-' . md5($build) . '.' . $collection->getExtension($group);
 
     $buildFolder = $this->buildPath . '/' . $this->buildDate;
-    $path = $this->buildPath . '/' . $fingerprint;
+    $path        = $this->buildPath . '/' . $fingerprint;
 
-    // If the collection has already been built and we're not forcing the build then we'll throw
-    // the exception here as we don't need to rebuild the collection.
-    if ($fingerprint == $entry->getProductionFingerprint($group) and !$this->force and $this->files->exists($path)) {
-      throw new BuildNotRequiredException;
+    if (!$this->files->isDirectory($buildFolder)) {
+      $this->files->makeDirectory($buildFolder, 0775);
     }
-    else {
-      if (!$this->files->isDirectory($buildFolder)) {
-        $this->files->makeDirectory($buildFolder, 0775);
-      }
-      $this->files->put($path, $this->gzip($build));
-      $entry->setProductionFingerprint($group, $fingerprint);
+    $this->files->put($path, $this->gzip($build));
+    $entry->setProductionFingerprint($group, $fingerprint);
+  }
+
+  /**
+   * If Gzipping is enabled the the zlib extension is loaded we'll Gzip the contents
+   * with a maximum compression level of 9.
+   *
+   * @param  string $contents
+   * @return string
+   */
+  protected function gzip($contents)
+  {
+    if ($this->gzip and function_exists('gzencode')) {
+      return gzencode($contents, 9);
     }
+
+    return $contents;
   }
 
   /**
@@ -149,7 +166,7 @@ class Builder {
 
         // If the build directory does not exist we'll attempt to recursively create it so we can
         // build the asset to the directory.
-        !$this->files->exists($directory = dirname($path)) and $this->files->makeDirectory($directory, 0777, true);
+        !$this->files->exists($directory = dirname($path)) and $this->files->makeDirectory($directory, 0777, TRUE);
 
         $this->files->put($path, $this->gzip($asset->build()));
 
@@ -176,7 +193,7 @@ class Builder {
     // If the manifest entry doesn't even have the group registered then it's obvious that the
     // collection has changed and needs to be rebuilt.
     if (!$entry->hasDevelopmentAssets($group)) {
-      return true;
+      return TRUE;
     }
 
     // Get the development assets from the manifest entry and flatten the keys so that we have
@@ -193,34 +210,6 @@ class Builder {
     })->flatten()->toArray());
 
     return !empty($difference);
-  }
-
-  /**
-   * Make the build path if it does not exist.
-   *
-   * @return void
-   */
-  protected function makeBuildPath()
-  {
-    if (!$this->files->exists($this->buildPath)) {
-      $this->files->makeDirectory($this->buildPath);
-    }
-  }
-
-  /**
-   * If Gzipping is enabled the the zlib extension is loaded we'll Gzip the contents
-   * with a maximum compression level of 9.
-   *
-   * @param  string $contents
-   * @return string
-   */
-  protected function gzip($contents)
-  {
-    if ($this->gzip and function_exists('gzencode')) {
-      return gzencode($contents, 9);
-    }
-
-    return $contents;
   }
 
   /**
